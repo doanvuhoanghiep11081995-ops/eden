@@ -312,7 +312,20 @@ for(let i=0;i<14;i++){const x=-3.5+i*2.8;box(site,x+1.35,39,x+1.42,44,0.09,0.1,0
 // đường phố, vỉa hè, đèn đường
 box(site,-40,-12,76,-8.3,0,0.14,0xc9c4b8);box(site,-40,-22,76,-12,0,0.05,0x5f5e5a);box(site,-40,-25.7,76,-22,0,0.14,0xc9c4b8);
 for(let x=-36;x<76;x+=6)box(site,x,-17.1,x+3,-16.9,0.05,0.06,0xf5f5f0);
-for(let x=-32;x<76;x+=12){tree(site,x,-10.2,0.8);box(site,x+6,-9.2,x+6.15,-9.05,0,5,0x6b6f6c);box(site,x+6,-9.7,x+6.15,-9.05,4.9,5.0,0x6b6f6c);}
+/* đèn đường: cột, cần vươn ra lòng đường, chụp đèn, bóng sáng ấm, quầng sáng và vệt sáng trên mặt đường */
+const glowTex=(()=>{const cv=document.createElement('canvas');cv.width=cv.height=64;const c=cv.getContext('2d'),g=c.createRadialGradient(32,32,2,32,32,32);
+ g.addColorStop(0,'rgba(255,224,150,1)');g.addColorStop(.4,'rgba(255,200,100,.45)');g.addColorStop(1,'rgba(255,190,80,0)');c.fillStyle=g;c.fillRect(0,0,64,64);return new THREE.CanvasTexture(cv);})();
+const haloM=new THREE.SpriteMaterial({map:glowTex,transparent:true,opacity:.75,depthWrite:false,blending:THREE.AdditiveBlending});
+const poolM=new THREE.MeshBasicMaterial({map:glowTex,transparent:true,opacity:.3,depthWrite:false,blending:THREE.AdditiveBlending});
+const bulbM=new THREE.MeshBasicMaterial({color:0xfff0b8});
+function streetLamp(g,x,z,dir){const P=0x55595c,tip=z+dir*1.7;
+ box(g,x-.08,z-.08,x+.08,z+.08,0,0.35,P);box(g,x-.06,z-.06,x+.06,z+.06,0.35,5,P);
+ box(g,x-.04,Math.min(z,tip),x+.04,Math.max(z,tip),4.92,5.0,P);
+ box(g,x-.22,tip-.32,x+.22,tip+.32,4.82,4.98,0x3d4144);
+ const b=new THREE.Mesh(new THREE.BoxGeometry(.34,.04,.5),bulbM);b.position.set(x,4.8,tip);g.add(b);
+ const h=new THREE.Sprite(haloM);h.position.set(x,4.72,tip);h.scale.set(1.8,1.8,1);g.add(h);
+ const p=new THREE.Mesh(new THREE.PlaneGeometry(5,5),poolM);p.rotation.x=-Math.PI/2;p.position.set(x,0.16,tip+dir*.6);g.add(p);}
+for(let x=-32;x<76;x+=12){tree(site,x,-10.2,0.8);streetLamp(site,x+6,-9.15,-1);streetLamp(site,x,-23.6,1);}
 [-30,-14,50,66].forEach(x=>palm(site,x,-24));
 const movingCar=car(site,-38,-19.5,Math.PI/2,0xf1efe8);
 // nhà lân cận
