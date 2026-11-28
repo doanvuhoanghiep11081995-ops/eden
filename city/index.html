@@ -30,7 +30,8 @@ button[aria-pressed=true]{background:var(--c);color:#fff}
 #vtNut{display:flex;flex-direction:column;gap:6px;margin-left:12px;padding-left:8px;border-left:3px solid #3c4a63}#vtNut[hidden]{display:none}#vtNut button{min-height:36px;font-size:12px}
 #luongNut{display:flex;flex-direction:column;gap:6px;margin-left:12px;padding-left:8px;border-left:3px solid #4a3f8a}#luongNut[hidden]{display:none}#luongNut button{min-height:34px;font-size:12px}
 #khuNut{display:flex;flex-direction:column;gap:6px;margin-left:12px;padding-left:8px;border-left:3px solid #6b4a33}
-#khuNut[hidden]{display:none}#khuNut button{min-height:38px;font-size:12px}
+#khuNut[hidden]{display:none}
+#kqNut{display:flex;flex-direction:column;gap:6px;margin-left:12px;padding-left:8px;border-left:3px solid #4f7a2e}#kqNut[hidden]{display:none}#kqNut button{min-height:34px;font-size:12px}#khuNut button{min-height:38px;font-size:12px}
 body.dem h1{color:#fff}
 #err{position:fixed;inset:40% 16px auto;text-align:center;display:none}
 </style>
@@ -2109,7 +2110,7 @@ var EN_H={'Toàn cảnh':'City on a <b>hexagon</b>: 3 <b>military + production</
  'Chăn nuôi':'<b>Livestock:</b> cattle shed, pig pen, chicken coop, duck pond and feed silo, next to the farm.','Dưỡng lão':'<b>Nursing home:</b> care for the elderly, with rooms, a garden walk, pond and pavilion.',
  'Đang xây':'<b>Construction site:</b> concrete frame being poured, half-built walls, scaffolding, crane and materials.','Nhà máy dược':'<b>Pharma plant:</b> clean production hall, mixing tanks, testing lab, packing, storage and delivery vans to hospitals.',
  'Công nghệ':'<b>Tech center:</b> research tower, innovation dome, robot, drone, solar panels.','Bảo tàng':'<b>Museum:</b> colonnaded hall, outdoor exhibits with a dinosaur skeleton, statue, vintage car, bronze drum.'};
-Object.assign(DICH,{'Thành Vatican':'Vatican City','Kim tự tháp Giza':'Pyramids of Giza','Đấu trường La Mã':'Colosseum','Vịnh Hạ Long':'Ha Long Bay'});
+Object.assign(DICH,{'Kỳ quan thế giới':'World wonders','Thành Vatican':'Vatican City','Kim tự tháp Giza':'Pyramids of Giza','Đấu trường La Mã':'Colosseum','Vịnh Hạ Long':'Ha Long Bay'});
 function tr(s){if(LANG==='vi'||!s)return s;if(DICH[s])return DICH[s];
   if(!KHOA_NN)KHOA_NN=Object.keys(DICH).filter(function(k){return DICH[k].indexOf(k)<0;}).sort(function(a,b){return b.length-a.length;});
   var r=s;KHOA_NN.forEach(function(k){if(r.indexOf(k)>=0)r=r.split(k).join(DICH[k]);});return r;}
@@ -2128,12 +2129,12 @@ document.getElementById('lang').onclick=function(){LANG=LANG==='vi'?'en':'vi';ap
 var CHE_DO=[['vt','🛰️ Vũ trụ','#3c4a63',function(){return tim('Vệ tinh');}],['tp','🏙️ Thành phố','#6b4a33',function(){return TOAN;}],['dc','🔀 Dòng chảy','#4a3f8a',function(){return tim('Dòng chảy');}]];
 function cheDoHien(v){if(/^(Vệ tinh|Hành trình|ISS)$/.test(v.n))return 'vt';if(v.n==='Dòng chảy'||v.n.indexOf('Luồng')===0)return 'dc';return 'tp';}
 /* nút khu hiện dưới nút Thành phố */
-var KHU_NUT=[['H','HC + thương mại','#2e6fb0',function(){return khuV.H;}],['S','Sản xuất + quân sự','#b5651d',function(){return khuV.S;}],['D','Dân cư','#3f7d4a',function(){return khuV.D;}],['T','Thắng cảnh','#4f7a2e',function(){return tcVT(MOI.dl);}]];
+var KHU_NUT=[['H','HC + thương mại','#2e6fb0',function(){return khuV.H;}],['S','Sản xuất + quân sự','#b5651d',function(){return khuV.S;}],['D','Dân cư','#3f7d4a',function(){return khuV.D;}],['T','Kỳ quan thế giới','#4f7a2e',function(){return tcVT(MOI.dl);}]];
 function khuHien(v){if(v===khuV.H)return 'H';if(v===khuV.S||v.khu==='S')return 'S';if(v===khuV.D||v.khu==='D')return 'D';if(v.n==='Thắng cảnh')return 'T';return '';}
 /* góc nhìn thắng cảnh tại điểm q (6 nơi quanh thành phố) */
 function tcVT(q){var v=tim('Thắng cảnh'),moc=MOI.dl,kq=kyQuanTai(q);if(v.xoay===undefined)v.xoay=Math.atan2(moc[0],moc[1]);
-  if(Math.hypot(q[0]-moc[0],q[1]-moc[1])<1){v.h=kq.h;v.hEn=kq.en;return v;}var k=q[0]+','+q[1];v.__t=v.__t||{};
-  if(!v.__t[k])v.__t[k]={n:v.n,nut:v.nut,c:v.c,h:kq.h,hEn:kq.en,r:v.r,at:[v.at[0]+q[0]-moc[0],v.at[1],v.at[2]+q[1]-moc[1]],xoay:Math.atan2(q[0],q[1]),goc:v};return v.__t[k];}
+  if(Math.hypot(q[0]-moc[0],q[1]-moc[1])<1){v.h=kq.h;v.hEn=kq.en;v.kq=kq.ten;return v;}var k=q[0]+','+q[1];v.__t=v.__t||{};
+  if(!v.__t[k])v.__t[k]={n:v.n,nut:v.nut,c:v.c,h:kq.h,hEn:kq.en,kq:kq.ten,r:v.r,at:[v.at[0]+q[0]-moc[0],v.at[1],v.at[2]+q[1]-moc[1]],xoay:Math.atan2(q[0],q[1]),goc:v};return v.__t[k];}
 var moCD=false;/* menu chế độ xem: mặc định thu gọn */
 function cheDo(){var vo=document.getElementById('chedo'),hop=document.getElementById('chedoNoi'),tg=document.getElementById('moChedo');
   if(!hop){tg=document.createElement('button');tg.type='button';tg.id='moChedo';tg.style.setProperty('--c','#3c4a63');tg.onclick=function(){moCD=!moCD;cheDo();};vo.appendChild(tg);
@@ -2143,11 +2144,14 @@ function cheDo(){var vo=document.getElementById('chedo'),hop=document.getElement
       /* nhãn trên bầu trời, bấm để bật tắt các đường kết nối */
       var cu_=CUR;CUR=null;tag('Kết nối không gian','#1fb6ff',0,205,0,'Vệ tinh');CUR=cu_;var e_=tags[tags.length-1].e;e_.style.pointerEvents='auto';e_.style.cursor='pointer';e_.style.fontSize='14px';e_.onclick=c.onclick;}
     if(m[0]==='dc'){var ln=document.createElement('div');ln.id='luongNut';hop.appendChild(ln);['Luồng tiền','Luồng tin','Luồng dầu','Luồng điện','Luồng hàng','Luồng thải'].forEach(function(n){var v=tim(n),c=document.createElement('button');c.type='button';c.textContent=v.nut;c.style.setProperty('--c',v.c);c.dataset.k=n;c.onclick=function(){pick(v);};ln.appendChild(c);});}
-    if(m[0]==='tp'){var kn=document.createElement('div');kn.id='khuNut';hop.appendChild(kn);KHU_NUT.forEach(function(q){var c=document.createElement('button');c.type='button';c.textContent=q[1];c.style.setProperty('--c',q[2]);c.dataset.k=q[0];c.onclick=function(){pick(q[3]());};kn.appendChild(c);});}});}
+    if(m[0]==='tp'){var kn=document.createElement('div');kn.id='khuNut';hop.appendChild(kn);KHU_NUT.forEach(function(q){var c=document.createElement('button');c.type='button';c.textContent=q[1];c.style.setProperty('--c',q[2]);c.dataset.k=q[0];c.onclick=function(){pick(q[3]());};kn.appendChild(c);
+      /* menu con: từng kỳ quan */
+      if(q[0]==='T'){var kd=document.createElement('div');kd.id='kqNut';kn.appendChild(kd);KY_QUAN.forEach(function(w){var b=document.createElement('button');b.type='button';b.textContent=w.ten;b.style.setProperty('--c',w.mau);b.dataset.kq=w.ten;b.onclick=function(){pick(tcVT(w.p));};kd.appendChild(b);});}});}});}
   var k=cheDoHien(view),kh=khuHien(view),kn=document.getElementById('khuNut');
   hop.hidden=!moCD;tg.setAttribute('aria-expanded',moCD);tg.textContent=tr(CHE_DO.filter(function(m){return m[0]===k;})[0][1])+(moCD?'  ▴':'  ▾');
   Array.prototype.forEach.call(hop.querySelectorAll(':scope>button'),function(b){b.setAttribute('aria-pressed',b.dataset.k===k);});
-  kn.hidden=k!=='tp';Array.prototype.forEach.call(kn.children,function(b){b.setAttribute('aria-pressed',b.dataset.k===kh);});
+  kn.hidden=k!=='tp';Array.prototype.forEach.call(kn.children,function(b){if(b.tagName==='BUTTON')b.setAttribute('aria-pressed',b.dataset.k===kh);});
+  var kqn=document.getElementById('kqNut');kqn.hidden=kh!=='T';Array.prototype.forEach.call(kqn.children,function(b){b.setAttribute('aria-pressed',b.dataset.kq===view.kq);});
   /* hàng nút 5 tòa nhà dưới đáy màn hình */
   var toa=document.getElementById('toa');
   if(!toa.children.length)[['kd','Kinh doanh','Kinh doanh'],['sx','Sản xuất','Sản xuất'],['xd','Xây dựng','Xây dựng'],['vh','Vận hành','Vận hành'],['hq','HQ','Trụ sở']].forEach(function(q){var v=tim(q[2]),b=document.createElement('button');b.type='button';b.textContent=q[1];b.style.setProperty('--c',v.c);b.dataset.k=q[0];b.onclick=function(){pick(v);};toa.appendChild(b);});
