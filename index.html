@@ -45,8 +45,9 @@ button.tourMain.on{color:#fff}
   function tao(){if(lop)return;lop=document.createElement('div');lop.id='tpLop';
     lop.innerHTML='<iframe src="city/" title="Thành phố lục giác" loading="eager"></iframe><button id="veToa" type="button">← Eden Building</button>';
     document.body.appendChild(lop);lop.querySelector('#veToa').onclick=dong;}
-  function mo(){tao();lop.classList.add('mo');}
-  function dong(){if(lop)lop.classList.remove('mo');}
+  function gui(m){try{lop.querySelector('iframe').contentWindow.postMessage(m,'*');}catch(e){}}
+  function mo(){tao();lop.classList.add('mo');gui('hien');}
+  function dong(){if(lop){lop.classList.remove('mo');gui('an');}}
   /* đợi tòa nhà hiện xong rồi mới bắt đầu tải thành phố */
   addEventListener('load',function(){setTimeout(tao,1200);});
   nut.addEventListener('click',function(e){e.preventDefault();mo();});
@@ -446,6 +447,111 @@ function buocDem(){if(!kinhM)return;const d=dem?1:0;if(kDem===d)return;kDem+=(d-
 addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();if(!touring)placeCam();renderer.setSize(innerWidth,innerHeight);});
 let last=performance.now();
 (function loop(now){requestAnimationFrame(loop);now=now||performance.now();const dt=Math.min((now-last)/1000,0.1);last=now;if(document.hidden)return;stepWalkers(dt);buocDem();if(ctl.enabled)ctl.update();syncView();renderer.render(scene,cam);})();
+})();
+</script>
+<script data-top="92">
+/* ===== Âm thanh tự tạo bằng Web Audio: xe cộ, chim hót (ngày), dế và gió (đêm), tiếng bấm nút, nhạc nền piano nhẹ =====
+   Trình duyệt chỉ cho phát tiếng sau khi người xem chạm vào trang, nên mặc định tắt; lựa chọn được nhớ lại cho lần sau. */
+(function(){
+var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+var me=document.currentScript,TOP=+((me&&me.dataset.top)||92);
+function doc(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function ghi(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+var bat=doc('eden_am')==='1',nhac=doc('eden_nhac')==='1';
+/* trang thành phố nằm trong khung ẩn của trang tòa nhà (trên tên miền riêng): im lặng cho tới khi được mở ra */
+var khung=window.parent!==window&&!/claude/.test(location.hostname),anKhung=khung;
+var ui=document.createElement('div');ui.id='amUI';
+ui.style.cssText='position:fixed;left:10px;top:'+TOP+'px;z-index:6;display:flex;gap:6px';
+function nut(t,nhan){var b=document.createElement('button');b.type='button';b.textContent=t;b.title=nhan;b.setAttribute('aria-label',nhan);
+  b.style.cssText='min-width:44px;min-height:40px;padding:0 8px;border:2px solid #3c4a63;border-radius:10px;background:#fff;color:#1d2b36;font-size:18px;line-height:1;cursor:pointer';
+  ui.appendChild(b);return b;}
+var nutAm=nut('🔇','Bật / tắt âm thanh'),nutNhac=nut('🎵','Bật / tắt nhạc nền');
+document.body.appendChild(ui);
+function ve(){nutAm.textContent=bat?'🔊':'🔇';nutAm.setAttribute('aria-pressed',bat);
+  nutNhac.setAttribute('aria-pressed',nhac);nutNhac.style.opacity=nhac?1:.5;nutNhac.style.background=nhac?'#e3f1ec':'#fff';}
+ve();
+
+var ctx=null,G={};
+function khoi(){if(ctx)return;ctx=new AC();
+  var M=ctx.createGain();M.gain.value=0;M.connect(ctx.destination);G.M=M;
+  var n=ctx.sampleRate*3,nau=ctx.createBuffer(1,n,ctx.sampleRate),trang=ctx.createBuffer(1,n,ctx.sampleRate),a=nau.getChannelData(0),b=trang.getChannelData(0),l=0;
+  for(var i=0;i<n;i++){var w=Math.random()*2-1;b[i]=w;l=(l+.02*w)/1.02;a[i]=l*3.5;}
+  G.trang=trang;
+  function lap(buf){var s=ctx.createBufferSource();s.buffer=buf;s.loop=true;s.start();return s;}
+  /* tiếng ù xe cộ ở xa */
+  var lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=380;G.xe=ctx.createGain();G.xe.gain.value=0;
+  lap(nau).connect(lp);lp.connect(G.xe);G.xe.connect(M);
+  /* gió: nhiễu qua bộ lọc dải, tần số lên xuống chậm */
+  var bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=600;bp.Q.value=.7;G.gio=ctx.createGain();G.gio.gain.value=0;
+  lap(trang).connect(bp);bp.connect(G.gio);G.gio.connect(M);
+  var lfo=ctx.createOscillator(),lg=ctx.createGain();lfo.frequency.value=.13;lg.gain.value=250;lfo.connect(lg);lg.connect(bp.frequency);lfo.start();
+  G.sk=ctx.createGain();G.sk.connect(M);
+  G.ui=ctx.createGain();G.ui.gain.value=.5;G.ui.connect(M);
+  /* nhạc: lọc bớt tiếng chói, thêm tiếng vọng */
+  G.nhac=ctx.createGain();G.nhac.gain.value=0;G.nIn=ctx.createGain();
+  var f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=2600;var dl=ctx.createDelay(1),fb=ctx.createGain();dl.delayTime.value=.38;fb.gain.value=.3;
+  G.nIn.connect(f);f.connect(G.nhac);f.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(G.nhac);G.nhac.connect(M);
+  setInterval(nhip,250);setInterval(lenLich,100);
+}
+function dem(){return document.body.classList.contains('dem');}
+function tatTam(){if(anKhung)return true;var l=document.getElementById('tpLop');return !!(l&&l.classList.contains('mo'));}
+var anTruoc=tatTam();
+function capNhat(){var an=tatTam();
+  if(anTruoc&&!an){bat=doc('eden_am')==='1';nhac=doc('eden_nhac')==='1';ve();if(bat){khoi();ctx.resume();}}/* vừa quay lại trang này: lấy lựa chọn mới nhất */
+  anTruoc=an;if(!ctx)return;var t=ctx.currentTime,d=dem();
+  G.M.gain.setTargetAtTime(bat&&!an?.9:0,t,.4);
+  G.xe.gain.setTargetAtTime(d?.05:.16,t,1.5);G.gio.gain.setTargetAtTime(d?.08:.02,t,1.5);
+  G.nhac.gain.setTargetAtTime(nhac?.5:0,t,.8);}
+setInterval(capNhat,400);
+
+/* tiếng theo lúc: chim ban ngày, dế ban đêm, thỉnh thoảng có xe chạy qua */
+var tChim=0,tDe=0,tXe=0;
+function nhip(){if(!bat||tatTam())return;var t=ctx.currentTime,d=dem();
+  if(!d&&t>tChim){chim(t);tChim=t+3+Math.random()*6;}
+  if(d&&t>tDe){de(t,4200+Math.random()*600);if(Math.random()<.4)de(t+.25,3700+Math.random()*300);tDe=t+.6+Math.random()*.8;}
+  if(t>tXe){xeQua(t,d);tXe=t+(d?9:3.5)+Math.random()*(d?10:5);}}
+function chim(t){var n=2+Math.floor(Math.random()*4),f0=2600+Math.random()*1400;
+  for(var i=0;i<n;i++){var s=t+i*(.11+Math.random()*.06),o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.setValueAtTime(f0,s);o.frequency.exponentialRampToValueAtTime(f0*(1.3+Math.random()*.4),s+.06);o.frequency.exponentialRampToValueAtTime(f0*.9,s+.1);
+    g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.05,s+.015);g.gain.exponentialRampToValueAtTime(.0005,s+.11);
+    o.connect(g);g.connect(G.sk);o.start(s);o.stop(s+.13);}}
+function de(t,f){for(var i=0;i<3;i++){var s=t+i*.045,o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=f;
+    g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(.022,s+.005);g.gain.exponentialRampToValueAtTime(.0005,s+.035);
+    o.connect(g);g.connect(G.sk);o.start(s);o.stop(s+.04);}}
+function xeQua(t,d){var s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain(),dai=2.6+Math.random()*1.5,huong=Math.random()<.5?-1:1;
+  s.buffer=G.trang;f.type='bandpass';f.Q.value=1.2;
+  f.frequency.setValueAtTime(300,t);f.frequency.linearRampToValueAtTime(700,t+dai/2);f.frequency.linearRampToValueAtTime(260,t+dai);
+  var v=d?.05:.09;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+dai/2);g.gain.linearRampToValueAtTime(0,t+dai);
+  s.connect(f);f.connect(g);
+  if(ctx.createStereoPanner){var p=ctx.createStereoPanner();p.pan.setValueAtTime(-huong,t);p.pan.linearRampToValueAtTime(huong,t+dai);g.connect(p);p.connect(G.sk);}else g.connect(G.sk);
+  s.start(t,Math.random()*2);s.stop(t+dai);}
+/* tiếng "tách" khi bấm nút */
+function tach(){if(!ctx||!bat)return;var t=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();
+  o.frequency.setValueAtTime(1100,t);o.frequency.exponentialRampToValueAtTime(600,t+.05);
+  g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.07);o.connect(g);g.connect(G.ui);o.start(t);o.stop(t+.08);}
+
+/* nhạc nền: rải hợp âm C - Am - F - G, thỉnh thoảng thêm nốt ngũ cung ở quãng cao */
+var NHIP=60/70,tNhac=0,buoc=0,HOP=[[48,55,60,64,67],[45,52,57,60,64],[41,48,53,57,60],[43,50,55,59,62]],NGU=[72,74,76,79,81,84],MAU=[0,1,2,3,4,3,2,1];
+function hz(m){return 440*Math.pow(2,(m-69)/12);}
+function phim(m,t,v,dai){var o=ctx.createOscillator(),o2=ctx.createOscillator(),g=ctx.createGain(),g2=ctx.createGain();
+  o.type='triangle';o.frequency.value=hz(m);o2.frequency.value=hz(m)*2;g2.gain.value=.25;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.01);g.gain.exponentialRampToValueAtTime(.0008,t+dai);
+  o.connect(g);o2.connect(g2);g2.connect(g);g.connect(G.nIn);o.start(t);o2.start(t);o.stop(t+dai+.05);o2.stop(t+dai+.05);}
+function lenLich(){if(!nhac||!bat||tatTam()){tNhac=0;return;}var now=ctx.currentTime;if(tNhac<now)tNhac=now+.1;
+  while(tNhac<now+.5){var h=HOP[Math.floor(buoc/8)%4],i=buoc%8;
+    phim(h[MAU[i]],tNhac,i===0?.1:.065,1.6);
+    if(i===0)phim(h[0]-12,tNhac,.09,3);
+    if((i===0||i===4)&&Math.random()<.6)phim(NGU[Math.floor(Math.random()*NGU.length)],tNhac+(Math.random()<.5?0:NHIP/2),.055,2);
+    tNhac+=NHIP/2;buoc++;}}
+
+function moTieng(){if(bat){khoi();ctx.resume();}ve();capNhat();}
+nutAm.onclick=function(){bat=!bat;ghi('eden_am',bat?'1':'0');moTieng();};
+nutNhac.onclick=function(){nhac=!nhac;ghi('eden_nhac',nhac?'1':'0');if(nhac&&!bat){bat=true;ghi('eden_am','1');}moTieng();};
+/* lần trước đã bật: chạm vào đâu trên trang cũng mở lại tiếng */
+addEventListener('pointerdown',function(){if(khung)anKhung=false;if(bat){khoi();if(ctx.state!=='running')ctx.resume();}},true);
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button,a,.tag');if(b&&b!==nutAm&&b!==nutNhac)tach();},true);
+document.addEventListener('visibilitychange',function(){if(!ctx)return;if(document.hidden)ctx.suspend();else if(bat)ctx.resume();});
+addEventListener('message',function(e){if(e.data==='an')anKhung=true;else if(e.data==='hien')anKhung=false;else return;capNhat();});
 })();
 </script>
 </body></html>
