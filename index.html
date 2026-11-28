@@ -21,6 +21,8 @@ input[type=range]{width:120px}
 #tpLop iframe{width:100%;height:100%;border:0;display:block}
 #veToa{position:fixed;left:10px;top:8px;z-index:21;min-height:40px;padding:0 14px;background:#fff;border:2px solid #1f6f5c;border-radius:10px;color:#1f6f5c;font:600 14px system-ui,sans-serif}
 #ten{position:fixed;left:10px;top:58px;z-index:5;font:700 18px system-ui,sans-serif;color:#23302b;pointer-events:none}
+#nutDem{position:fixed;right:10px;top:10px;z-index:5;min-height:40px;padding:0 14px;font-weight:600}
+body.dem #ten{color:#fff}body.dem #tourUI .tip{background:rgba(20,30,50,.8);color:#dfe6f0}
 #tourUI{position:fixed;right:10px;bottom:10px;z-index:6;display:flex;flex-direction:column-reverse;gap:6px;align-items:flex-end;max-width:calc(100% - 20px)}
 #tourUI{pointer-events:none}#tourUI>*{pointer-events:auto}
 #tourUI button{min-height:38px}
@@ -66,7 +68,7 @@ app.appendChild(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color(0xeef2ef);
 const cam=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,500);
 const ctl=new THREE.OrbitControls(cam,renderer.domElement);ctl.enableDamping=true;ctl.maxPolarAngle=Math.PI*0.49;
-scene.add(new THREE.HemisphereLight(0xffffff,0xb8c4bc,0.75));
+const hemi=new THREE.HemisphereLight(0xffffff,0xb8c4bc,0.75);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffffff,0.75);sun.position.set(30,50,20);sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);const sc=sun.shadow.camera;sc.left=-40;sc.right=40;sc.top=40;sc.bottom=-40;sc.far=150;
 scene.add(sun);
@@ -424,9 +426,26 @@ function setTour(on){touring=on;ctl.enabled=on;
 tourBtn.onclick=()=>setTour(!touring);
 viewBtn.onclick=()=>{if(unit.visible)showBuilding();else showUnit();};
 setTour(false);
+/* ---------- Ban ngày / ban đêm ---------- */
+const nutDem=document.createElement('button');nutDem.id='nutDem';nutDem.type='button';nutDem.textContent='🌙 Ban đêm';nutDem.setAttribute('aria-pressed','false');document.body.appendChild(nutDem);
+let dem=false,kDem=0,kinhM=null;
+const NGAY=new THREE.Color(0xeef2ef),DEM=new THREE.Color(0x0b1530),HEMI_DEM=new THREE.Color(0x8fa8e8),SUN_DEM=new THREE.Color(0x9db8ff);
+const denTroi=new THREE.Group();denTroi.visible=false;scene.add(denTroi);
+const trang=new THREE.Mesh(new THREE.SphereGeometry(4,20,16),new THREE.MeshBasicMaterial({color:0xfdf6d8}));trang.position.set(-90,70,-140);denTroi.add(trang);
+const saoP=[];for(let i=0;i<500;i++){const a=i*2.39996,h=(i*37%101)/101,R=380,y=20+h*h*300,rr=Math.sqrt(Math.max(R*R-y*y,400));saoP.push(new THREE.Vector3(Math.cos(a)*rr,y,Math.sin(a)*rr));}
+const saoM=new THREE.PointsMaterial({color:0xffffff,size:1.8,sizeAttenuation:false,transparent:true,opacity:0});
+denTroi.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(saoP),saoM));
+function apDem(k){const bg=NGAY.clone().lerp(DEM,k);scene.background=bg;document.body.style.background='#'+bg.getHexString();
+ hemi.intensity=.75-.5*k;hemi.color.set(0xffffff).lerp(HEMI_DEM,k);sun.intensity=.75-.6*k;sun.color.set(0xffffff).lerp(SUN_DEM,k);
+ (kinhM||[]).forEach(m=>m.emissive.setHex(0xffbe4a).multiplyScalar(k*.75));
+ haloM.opacity=.35+.65*k;poolM.opacity=.1+.5*k;saoM.opacity=k;denTroi.visible=k>.02;}
+apDem(0);
+nutDem.onclick=()=>{if(!kinhM)kinhM=Object.values(mats).filter(m=>[C.glass,GL].includes(m.color.getHex()));
+ dem=!dem;nutDem.textContent=dem?'☀️ Ban ngày':'🌙 Ban đêm';nutDem.setAttribute('aria-pressed',dem);nutDem.classList.toggle('on',dem);document.body.classList.toggle('dem',dem);};
+function buocDem(){if(!kinhM)return;const d=dem?1:0;if(kDem===d)return;kDem+=(d-kDem)*.08;if(Math.abs(d-kDem)<.005)kDem=d;apDem(kDem);}
 addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();if(!touring)placeCam();renderer.setSize(innerWidth,innerHeight);});
 let last=performance.now();
-(function loop(now){requestAnimationFrame(loop);now=now||performance.now();const dt=Math.min((now-last)/1000,0.1);last=now;if(document.hidden)return;stepWalkers(dt);if(ctl.enabled)ctl.update();syncView();renderer.render(scene,cam);})();
+(function loop(now){requestAnimationFrame(loop);now=now||performance.now();const dt=Math.min((now-last)/1000,0.1);last=now;if(document.hidden)return;stepWalkers(dt);buocDem();if(ctl.enabled)ctl.update();syncView();renderer.render(scene,cam);})();
 })();
 </script>
 </body></html>
