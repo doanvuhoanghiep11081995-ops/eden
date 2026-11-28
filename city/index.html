@@ -617,15 +617,116 @@ S('mo');
   box(1.7,.4,1.1,0x333a44,3.6,.3,2.4,mo);box(1,.8,.9,0xf2c21a,3.8,.9,2.4,mo);var can=box(2,.18,.18,0xf2c21a,2.6,1.5,2.4,mo);can.rotation.z=-.5;box(.5,.35,.6,0x4a5058,1.7,1.85,2.4,mo);
   [[4.4,-2.8,0x4a4f57],[5.2,-1.2,0xb5793a],[-4.8,3.4,0x4a4f57]].forEach(function(p){non(1,1.2,p[2],p[0],.6,p[1],mo,7);});
   person(mo,0xf2c21a,-1.5,-1,0);person(mo,0xf2c21a,0,3.6,0).walk=1.2;
-  /* Danh lam thắng cảnh */
-S('dl');
-  var dl=khu(23,64,0xa9cf8c,'Danh lam thắng cảnh','#2e7d9a','Thắng cảnh',7.4);
-  [[-3.6,-2.4,3,5.4],[0,-3,3.4,6.4],[3.8,-2.2,2.6,4.4]].forEach(function(m){non(m[2],m[3],0x5f8a63,m[0],m[3]/2,m[1],dl,8);non(m[2]*.28,m[3]*.28,0xffffff,m[0],m[3]*.87,m[1],dl,8);});
-  var thac=box(.5,3.2,.1,0xcfeeff,.2,1.5,-.9,dl);thac.rotation.x=-.45;
-  cyl(2.4,.12,0x3fa7d6,-1,.08,1.8,dl);box(1.1,.25,.5,0x9a6a45,-1.6,.28,1.8,dl);
-  [[2.4,.9],[4.4,.9],[2.4,2.9],[4.4,2.9]].forEach(function(p){cyl(.1,1.4,0xc2553f,p[0],.7,p[1],dl);});var mm=non(2,1,0x9a4a2a,3.4,1.9,1.9,dl,4);mm.rotation.y=Math.PI/4;
-  cay(dl,-5.2,2.6,1);cay(dl,5.6,.2,1);person(dl,0xd9622b,3.4,4,Math.PI);person(dl,0x8a5a9e,1,4.2,Math.PI).walk=.8;
 })();
+
+/* ===== Sáu kỳ quan thế giới thay cho sáu khu thắng cảnh giống nhau (mô hình cách điệu) =====
+   Dựng bằng khối thường để bước gộp khối phía dưới gộp lại; phần sáng đèn ban đêm dùng vật liệu riêng. */
+S(null);
+var KY_QUAN=(function(){
+  var SANG=[],ds=[];
+  function vl(c){var m=new T.MeshLambertMaterial({color:c,transparent:true,opacity:1});SANG.push(m);return m;}/* vật liệu sáng lên ban đêm */
+  function k(geo,m,x,y,z,g){var o=new T.Mesh(geo,m);o.position.set(x,y,z);g.add(o);return o;}
+  function hop(w,h,d,m,x,y,z,g){return k(new T.BoxGeometry(w,h,d),m,x,y,z,g);}
+  function tru(r,h,m,x,y,z,g,n){return k(new T.CylinderGeometry(r,r,h,n||16),m,x,y,z,g);}
+  function vom(r,m,x,y,z,g){return k(new T.SphereGeometry(r,18,10,0,Math.PI*2,0,Math.PI/2),m,x,y,z,g);}
+  function chop(r,h,c,x,y,z,g,n){return k(new T.ConeGeometry(r,h,n||4),mat(c),x,y,z,g);}
+  function nen(g,c){tru(6.8,.14,mat(c),0,-.03,0,g,32);}
+  function cay(g,x,z,s){s=s||1;tru(.08*s,.6*s,mat(0x7a5233),x,.3*s,z,g,6);chop(.4*s,1.3*s,0x2f6b3d,x,1.1*s,z,g,8);}
+  function cot(g,x,z,s){tru(.07,1.6*s,mat(0x8a6d4b),x,.8*s,z,g,6);[0,1,2,3,4].forEach(function(i){var a=i*1.2566,o=hop(.9*s,.05,.25*s,mat(0x5f9e3a),x+Math.cos(a)*.4*s,1.6*s,z+Math.sin(a)*.4*s,g);o.rotation.y=-a;o.rotation.z=-.3;});}
+
+  function vatican(g){nen(g,0xcfc8b6);var tv=vl(0xefe6d0),dm=mat(0x8fa9a0);
+    hop(2.8,2.4,4.6,tv,0,1.2,-3.6,g);hop(6,2,1.8,tv,0,1,-4.2,g);
+    hop(5.6,2.8,.7,tv,0,1.4,-1.1,g);hop(5.8,.3,.8,tv,0,2.95,-1.1,g);hop(2,.5,.7,tv,0,3.35,-1.1,g);
+    for(var i=0;i<8;i++)tru(.11,2.3,tv,-2.45+i*.7,1.2,-.68,g,8);
+    hop(.8,1.3,.05,mat(0x6b4a33),0,.65,-.72,g);
+    tru(1.25,1,tv,0,3.1,-4.1,g,20);vom(1.35,dm,0,3.6,-4.1,g);tru(.22,.6,tv,0,5.25,-4.1,g,10);chop(.2,.45,0x8fa9a0,0,5.75,-4.1,g,10);
+    [-1.9,1.9].forEach(function(x){vom(.45,dm,x,2.05,-4.6,g);});
+    var pz=tru(3.2,.06,mat(0xd9d2c2),0,.08,2.7,g,32);pz.scale.x=1.35;
+    /* hai dãy hàng cột cong ôm quảng trường */
+    [-1,1].forEach(function(s){var P=[];for(var j=0;j<=10;j++){var a=-1.22+j/10*2.44;P.push([s*4.4*Math.cos(a),2.7+3.1*Math.sin(a)]);}
+      P.forEach(function(p,j){tru(.12,1.5,tv,p[0],.83,p[1],g,8);if(j){var q=P[j-1],dx=p[0]-q[0],dz=p[1]-q[1],L=Math.hypot(dx,dz);
+        var r=hop(L+.08,.28,.55,tv,(p[0]+q[0])/2,1.7,(p[1]+q[1])/2,g);r.rotation.y=Math.atan2(-dz,dx);}});
+      var e=P[0],dx=s*2.3-e[0],dz=-.8-e[1],L=Math.hypot(dx,dz),w=hop(L,1.3,.5,tv,(e[0]+s*2.3)/2,.7,(e[1]-.8)/2,g);w.rotation.y=Math.atan2(-dz,dx);});
+    hop(.22,2,.22,mat(0xc9b48a),0,1.1,2.7,g);chop(.16,.32,0xc9b48a,0,2.26,2.7,g,4);
+    [-1.9,1.9].forEach(function(x){tru(.35,.2,mat(0x3fa7d6),x,.17,2.7,g,12);tru(.06,.5,mat(0xdfe4ea),x,.4,2.7,g,6);});
+    person(g,0xf2c21a,-.8,4.6,0);person(g,0x2e6fb0,1.2,3.6,Math.PI).walk=.5;}
+
+  function giza(g){nen(g,0xe3c98f);
+    function kt(r,h,x,z,c){chop(r,h,c,x,h/2,z,g,4).rotation.y=Math.PI/4;}
+    kt(3.3,4.3,-1.6,-2.2,0xd9b46a);kt(2.8,3.7,2.5,-.6,0xd3ad62);kt(1.5,2,4.1,2.9,0xcfa85d);
+    [[-4.7,.9],[-4.7,2.1],[-3.6,2.1]].forEach(function(p){kt(.55,.75,p[0],p[1],0xc9a35a);});
+    var c=mat(0xc9a35a),sx=-1.2,sz=3;
+    hop(.75,.55,2,c,sx,.35,sz-.3,g);hop(.6,.65,.6,c,sx,.9,sz+.75,g);hop(.85,.4,.35,c,sx,1.05,sz+.55,g);
+    [-.22,.22].forEach(function(d){hop(.22,.2,.7,c,sx+d,.15,sz+1.2,g);});
+    cot(g,3.2,4.6,1);cot(g,4.4,4,1.1);cot(g,-4.2,-3.8,1);
+    person(g,0xffffff,.4,4.4,0).walk=.6;person(g,0xd9622b,1.2,4.8,Math.PI);}
+
+  function taj(g){nen(g,0x8fbf6a);var tm=vl(0xf6f3ec),vang=mat(0xd9b46a);
+    hop(7,.5,6,tm,0,.25,-2.4,g);hop(3.6,2.6,3.6,tm,0,1.8,-2.4,g);
+    [-1.85,1.85].forEach(function(x){hop(.1,2.2,3.2,mat(0xe2ddd2),x,1.7,-2.4,g);});
+    hop(1.3,2,.08,mat(0xc9c2b2),0,1.6,-.56,g);hop(.9,1.3,.1,mat(0x6b5a4a),0,1.2,-.54,g);
+    tru(1.15,.7,tm,0,3.45,-2.4,g,20);var d=k(new T.SphereGeometry(1.35,20,14),tm,0,4.45,-2.4,g);d.scale.y=1.15;tru(.05,.9,vang,0,6.1,-2.4,g,6);
+    [[-1.3,-1.1],[1.3,-1.1],[-1.3,-3.7],[1.3,-3.7]].forEach(function(p){tru(.35,.5,tm,p[0],3.35,p[1],g,10);vom(.38,tm,p[0],3.6,p[1],g);});
+    [[-3.2,.3],[3.2,.3],[-3.2,-5.1],[3.2,-5.1]].forEach(function(p){tru(.2,4,tm,p[0],2.5,p[1],g,10);tru(.28,.12,tm,p[0],3.4,p[1],g,10);tru(.26,.3,tm,p[0],4.6,p[1],g,10);vom(.3,tm,p[0],4.75,p[1],g);});
+    hop(.9,.06,4.6,mat(0x3fa7d6),0,.1,3.4,g);[-2.1,2.1].forEach(function(x){hop(2.6,.1,4.6,mat(0x6ab04c),x,.08,3.4,g);});
+    [1.6,2.8,4,5.2].forEach(function(z){[-.8,.8].forEach(function(x){chop(.25,1.2,0x2f5a30,x,.7,z,g,8);});});
+    person(g,0xd9622b,-1.4,5.6,Math.PI);person(g,0x8a5a9e,1.4,5.4,Math.PI).walk=.5;}
+
+  function colosseum(g){nen(g,0xcbbf9f);var tv=vl(0xd8c49c),toi=mat(0x6e5f45),trong=mat(0xbfae8a);
+    function vong(a,b,cao,m,n,lo){for(var i=0;i<n;i++){var t0=i/n*Math.PI*2,t1=(i+1)/n*Math.PI*2,x0=a*Math.cos(t0),z0=b*Math.sin(t0),x1=a*Math.cos(t1),z1=b*Math.sin(t1);
+      var dx=x1-x0,dz=z1-z0,L=Math.hypot(dx,dz),r=Math.atan2(-dz,dx),tm=(t0+t1)/2,
+        sup=lo&&tm>Math.PI*1.12&&tm<Math.PI*1.62,H=sup?1.4+1.2*Math.abs(Math.sin(i*2.7)):cao;
+      var w=hop(L+.04,H,.45,m,(x0+x1)/2,H/2,(z0+z1)/2,g);w.rotation.y=r;
+      if(lo)for(var t=0;t<3;t++){if(.55+t*1.15+.4>H)break;var c=hop(L*.45,.65,.5,toi,(x0+x1)/2,.6+t*1.15,(z0+z1)/2,g);c.rotation.y=r;}}}
+    vong(5.2,4.2,3.9,tv,40,true);vong(3.8,3,1.7,trong,28,false);
+    var f=tru(1,.1,mat(0xd9c08a),0,.06,0,g,28);f.scale.set(3.1,1,2.4);
+    person(g,0x2e6fb0,-1,5.8,Math.PI);person(g,0xc2553f,1.6,5.6,Math.PI).walk=.6;}
+
+  function chichen(g){nen(g,0x8fbf6a);var y=0;
+    for(var t=0;t<9;t++){var s=8-t*.62;hop(s,.42,s,mat(t%2?0xc9bfa3:0xbfb497),0,t*.42+.21,-.5,g);}
+    var cao=9*.42,ngang=4-1.52,dai=Math.hypot(cao,ngang),nghieng=Math.atan2(cao,ngang);
+    for(var q=0;q<4;q++){var sub=new T.Group();sub.position.set(0,0,-.5);sub.rotation.y=q*Math.PI/2;g.add(sub);
+      hop(1.3,.25,dai,mat(0xa89c80),0,cao/2,(4+1.52)/2,sub).rotation.x=nghieng;
+      [-.75,.75].forEach(function(x){hop(.18,.3,dai,mat(0x8a7f66),x,cao/2+.1,(4+1.52)/2,sub).rotation.x=nghieng;});}
+    hop(2.4,1.2,2.4,mat(0xd8cfb3),0,cao+.6,-.5,g);hop(2.7,.22,2.7,mat(0xa89c80),0,cao+1.3,-.5,g);
+    hop(.6,.8,2.46,mat(0x3d3428),0,cao+.45,-.5,g);hop(2.46,.8,.6,mat(0x3d3428),0,cao+.45,-.5,g);
+    [[-5,-4],[5,-3.6],[-5.2,3],[5.3,3.4],[-3.6,5.2]].forEach(function(p){cay(g,p[0],p[1],1.1);});
+    person(g,0xffffff,-1.6,5,0).walk=.7;person(g,0xd9622b,1.8,5.3,Math.PI);}
+
+  function haLong(g){nen(g,0x2a7fb5);
+    [[-3,-2.5,1.3,4.2],[-.6,-3.6,1,3.2],[2.4,-2.2,1.5,4.8],[4.3,1.2,.9,2.6],[-4.4,1.4,.8,2.4],[1.2,.8,.7,2.2],[-1.3,2.8,.35,1.4],[-.8,2.95,.3,1.2],[3.6,-4.6,.7,2]].forEach(function(d){
+      k(new T.CylinderGeometry(d[2]*.72,d[2],d[3],9),mat(0x8b8f7a),d[0],d[3]/2,d[1],g);var c=k(new T.SphereGeometry(d[2]*.78,9,6),mat(0x4f7d3f),d[0],d[3],d[1],g);c.scale.y=.6;});
+    [[-2.2,4.4,.4],[2.6,3.4,-.6],[.4,-.9,1.2]].forEach(function(b){var t=new T.Group();t.position.set(b[0],0,b[1]);t.rotation.y=b[2];g.add(t);
+      hop(1.5,.3,.5,mat(0x6b4a33),0,.18,0,t);hop(.4,.3,.45,mat(0x8a6d4b),-.5,.45,0,t);
+      [-.1,.45].forEach(function(x,i){hop(.55-i*.12,.95-i*.2,.04,mat(0xb5493a),x,.85-i*.1,0,t);});});}
+
+  var KQ=[
+   {ten:'Thành Vatican',mau:'#8a6d1c',cao:7,xay:vatican,h:'<b>Thành Vatican</b> (Rome, Ý): quốc gia nhỏ nhất thế giới. Vương cung thánh đường Thánh Phêrô với mái vòm lớn, quảng trường bầu dục ôm bởi hai dãy hàng cột. Mô hình cách điệu.',
+    en:'<b>Vatican City</b> (Rome, Italy): the world\'s smallest state. St. Peter\'s Basilica with its great dome, and the oval square embraced by two colonnades. Stylised model.'},
+   {ten:'Kim tự tháp Giza',mau:'#a8761a',cao:6,xay:giza,h:'<b>Kim tự tháp Giza</b> (Ai Cập): ba kim tự tháp hơn 4.500 năm tuổi và tượng Nhân sư, kỳ quan cổ đại duy nhất còn tồn tại. Mô hình cách điệu.',
+    en:'<b>Pyramids of Giza</b> (Egypt): three pyramids over 4,500 years old and the Great Sphinx, the only surviving ancient wonder. Stylised model.'},
+   {ten:'Taj Mahal',mau:'#7a5aa0',cao:7.5,xay:taj,h:'<b>Taj Mahal</b> (Agra, Ấn Độ): lăng mộ đá cẩm thạch trắng, mái vòm củ hành, bốn tháp nhỏ và hồ phản chiếu. Mô hình cách điệu.',
+    en:'<b>Taj Mahal</b> (Agra, India): a white marble mausoleum with an onion dome, four minarets and a reflecting pool. Stylised model.'},
+   {ten:'Đấu trường La Mã',mau:'#8a5a33',cao:5.6,xay:colosseum,h:'<b>Đấu trường La Mã</b> (Rome, Ý): đấu trường bầu dục gần 2.000 năm tuổi, nhiều tầng vòm, một mảng tường ngoài đã sụp. Mô hình cách điệu.',
+    en:'<b>Colosseum</b> (Rome, Italy): an oval amphitheatre almost 2,000 years old, with tiers of arches and part of the outer wall fallen. Stylised model.'},
+   {ten:'Chichén Itzá',mau:'#5a7a2e',cao:7,xay:chichen,h:'<b>Chichén Itzá</b> (Mexico): kim tự tháp bậc thang El Castillo của người Maya, cầu thang bốn mặt dẫn lên đền trên đỉnh. Mô hình cách điệu.',
+    en:'<b>Chichén Itzá</b> (Mexico): El Castillo, the Maya stepped pyramid, with stairs on all four sides up to the temple. Stylised model.'},
+   {ten:'Vịnh Hạ Long',mau:'#1f6f99',cao:6.5,xay:haLong,h:'<b>Vịnh Hạ Long</b> (Quảng Ninh, Việt Nam): hàng nghìn đảo đá vôi nhô lên mặt biển, thuyền buồm nâu đỏ đi giữa các đảo. Mô hình cách điệu.',
+    en:'<b>Ha Long Bay</b> (Quang Ninh, Vietnam): thousands of limestone islands rising from the sea, with red-brown sailing junks between them. Stylised model.'}];
+
+  /* quầng sáng trên mặt đất ban đêm */
+  var cv=document.createElement('canvas');cv.width=cv.height=64;var c2=cv.getContext('2d'),gr=c2.createRadialGradient(32,32,2,32,32,32);
+  gr.addColorStop(0,'rgba(255,214,120,1)');gr.addColorStop(.5,'rgba(255,190,80,.35)');gr.addColorStop(1,'rgba(255,180,60,0)');c2.fillStyle=gr;c2.fillRect(0,0,64,64);
+  var quangM=new T.MeshBasicMaterial({map:new T.CanvasTexture(cv),transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending});
+  KQ.forEach(function(w,i){var p=cuc(i*60,290),g=new T.Group();g.position.set(p[0],0,p[1]);g.rotation.y=Math.atan2(p[0],p[1]);scene.add(g);/* mặt trước quay ra phía người xem */
+    w.p=p;w.xay(g);var ql=new T.Mesh(new T.PlaneGeometry(17,17),quangM);ql.rotation.x=-Math.PI/2;ql.position.y=.2;g.add(ql);
+    tag(w.ten,w.mau,p[0],w.cao,p[1],'Thắng cảnh');});
+  var kDem=0,AM=new T.Color(0xffc878);
+  hoatCanh.push(function(){var d=document.body.classList.contains('dem')?1:0;if(kDem===d)return;kDem+=(d-kDem)*.08;if(Math.abs(d-kDem)<.005)kDem=d;
+    quangM.opacity=.55*kDem;SANG.forEach(function(m){m.emissive.copy(AM).multiplyScalar(.5*kDem);});});
+  return KQ;
+})();
+function kyQuanTai(q){var m=null,d=1e9;KY_QUAN.forEach(function(w){var e=Math.hypot(w.p[0]-q[0],w.p[1]-q[1]);if(e<d){d=e;m=w;}});return m;}
 
 S('qp');
 /* ===== Cụm Bộ Quốc phòng ===== */
@@ -2008,10 +2109,11 @@ var EN_H={'Toàn cảnh':'City on a <b>hexagon</b>: 3 <b>military + production</
  'Chăn nuôi':'<b>Livestock:</b> cattle shed, pig pen, chicken coop, duck pond and feed silo, next to the farm.','Dưỡng lão':'<b>Nursing home:</b> care for the elderly, with rooms, a garden walk, pond and pavilion.',
  'Đang xây':'<b>Construction site:</b> concrete frame being poured, half-built walls, scaffolding, crane and materials.','Nhà máy dược':'<b>Pharma plant:</b> clean production hall, mixing tanks, testing lab, packing, storage and delivery vans to hospitals.',
  'Công nghệ':'<b>Tech center:</b> research tower, innovation dome, robot, drone, solar panels.','Bảo tàng':'<b>Museum:</b> colonnaded hall, outdoor exhibits with a dinosaur skeleton, statue, vintage car, bronze drum.'};
+Object.assign(DICH,{'Thành Vatican':'Vatican City','Kim tự tháp Giza':'Pyramids of Giza','Đấu trường La Mã':'Colosseum','Vịnh Hạ Long':'Ha Long Bay'});
 function tr(s){if(LANG==='vi'||!s)return s;if(DICH[s])return DICH[s];
   if(!KHOA_NN)KHOA_NN=Object.keys(DICH).filter(function(k){return DICH[k].indexOf(k)<0;}).sort(function(a,b){return b.length-a.length;});
   var r=s;KHOA_NN.forEach(function(k){if(r.indexOf(k)>=0)r=r.split(k).join(DICH[k]);});return r;}
-function hT(v){if(LANG==='vi')return v.h;var n=v.n,m=n.match(/^(Y tế|Công an|PCCC) ([DHS])$/);if(EN_H[n])return EN_H[n];
+function hT(v){if(LANG==='vi')return v.h;if(v.hEn)return v.hEn;var n=v.n,m=n.match(/^(Y tế|Công an|PCCC) ([DHS])$/);if(EN_H[n])return EN_H[n];
   if(m){if(m[2]==='H')return {'Y tế':'<b>General hospital:</b> top tier for the city; treatment, emergency care (115).','Công an':'<b>Police HQ:</b> commands security and crime fighting (113).','PCCC':'<b>Fire HQ:</b> commands firefighting and rescue (114).'}[m[1]];
     return '<b>'+tr(m[1])+', '+(m[2]==='D'?'residential':'production')+' zone:</b> '+{'Y tế':'treatment, emergency care (115).','Công an':'security and public order (113).','PCCC':'firefighting and rescue (114).'}[m[1]];}
   return tr(v.h);}
@@ -2029,9 +2131,9 @@ function cheDoHien(v){if(/^(Vệ tinh|Hành trình|ISS)$/.test(v.n))return 'vt';
 var KHU_NUT=[['H','HC + thương mại','#2e6fb0',function(){return khuV.H;}],['S','Sản xuất + quân sự','#b5651d',function(){return khuV.S;}],['D','Dân cư','#3f7d4a',function(){return khuV.D;}],['T','Thắng cảnh','#4f7a2e',function(){return tcVT(MOI.dl);}]];
 function khuHien(v){if(v===khuV.H)return 'H';if(v===khuV.S||v.khu==='S')return 'S';if(v===khuV.D||v.khu==='D')return 'D';if(v.n==='Thắng cảnh')return 'T';return '';}
 /* góc nhìn thắng cảnh tại điểm q (6 nơi quanh thành phố) */
-function tcVT(q){var v=tim('Thắng cảnh'),moc=MOI.dl;if(v.xoay===undefined)v.xoay=Math.atan2(moc[0],moc[1]);
-  if(Math.hypot(q[0]-moc[0],q[1]-moc[1])<1)return v;var k=q[0]+','+q[1];v.__t=v.__t||{};
-  if(!v.__t[k])v.__t[k]={n:v.n,nut:v.nut,c:v.c,h:v.h,r:v.r,at:[v.at[0]+q[0]-moc[0],v.at[1],v.at[2]+q[1]-moc[1]],xoay:Math.atan2(q[0],q[1]),goc:v};return v.__t[k];}
+function tcVT(q){var v=tim('Thắng cảnh'),moc=MOI.dl,kq=kyQuanTai(q);if(v.xoay===undefined)v.xoay=Math.atan2(moc[0],moc[1]);
+  if(Math.hypot(q[0]-moc[0],q[1]-moc[1])<1){v.h=kq.h;v.hEn=kq.en;return v;}var k=q[0]+','+q[1];v.__t=v.__t||{};
+  if(!v.__t[k])v.__t[k]={n:v.n,nut:v.nut,c:v.c,h:kq.h,hEn:kq.en,r:v.r,at:[v.at[0]+q[0]-moc[0],v.at[1],v.at[2]+q[1]-moc[1]],xoay:Math.atan2(q[0],q[1]),goc:v};return v.__t[k];}
 var moCD=false;/* menu chế độ xem: mặc định thu gọn */
 function cheDo(){var vo=document.getElementById('chedo'),hop=document.getElementById('chedoNoi'),tg=document.getElementById('moChedo');
   if(!hop){tg=document.createElement('button');tg.type='button';tg.id='moChedo';tg.style.setProperty('--c','#3c4a63');tg.onclick=function(){moCD=!moCD;cheDo();};vo.appendChild(tg);
@@ -2207,12 +2309,11 @@ function frame(ms){
   function doi(o,tu,den,a){var dx=o.position.x-tu[0],dz=o.position.z-tu[1];o.position.x=den[0]+dx*Math.cos(a)+dz*Math.sin(a);o.position.z=den[1]-dx*Math.sin(a)+dz*Math.cos(a);o.rotation.y=a;}
   function nhan(src,ds,tu,a){var g0=src.clone();ds.forEach(function(d){var o=g0.clone();doi(o,tu,d[0],d[1]);_add(o);phanCu.push(o);BAN_SAO.push({o:o,src:src});});}
   var bt_=SITES.bt;if(bt_){var T0=TU.bt;nhan(bt_,[2,4].map(function(i){return [chuyen(i,i,DINH[i][0],DINH[i][1]+84),goc(i)-Math.PI/2];}),T0,0);}
-  var dl_=SITES.dl;if(dl_)nhan(dl_,[60,120,180,240,300].map(function(d){return [cuc(d,290),0];}),MOI.dl,0);
   ['cang','hd','hk','atshR'].forEach(function(id){var src=SITES[id],t=TU[id];if(!src)return;
     nhan(src,[3,5].map(function(i){return [chuyen(i,i,DINH[i][0]+t[4],DINH[i][1]+t[5]),goc(i)];}),t,0);});
   [3,5].forEach(function(i){var t=TU.atshR,q=chuyen(i,i,DINH[i][0]+t[4],DINH[i][1]+t[5]);tag('ATSH cấp 3-4','#0f7c8a',q[0],6,q[1],khuV.S.n);tags[tags.length-1].dinhK=i;});
   ['cang','hd','hk','atshR','bt'].forEach(function(id){var o=SITES[id],t=TU[id];if(o)doi(o,t,t,t[2]);});
-  [0,60,120,180,240,300].forEach(function(d){var q=cuc(d,290);tag('Thắng cảnh','#4f7a2e',q[0],8,q[1],'Toàn cảnh');
+  [0,60,120,180,240,300].forEach(function(d){var q=cuc(d,290);tag(kyQuanTai(q).ten,'#4f7a2e',q[0],8,q[1],'Toàn cảnh');
     var g=tags[tags.length-1];g.e.style.pointerEvents='auto';g.e.style.cursor='pointer';g.e.onclick=function(){pick(tcVT(q));};});
   tag('ATSH cấp 3-4','#0f7c8a',MOI.atshR[0],6,MOI.atshR[1],khuV.S.n);tags[tags.length-1].dinhK=1;
   tags.forEach(function(g){if(g.dinhK===undefined&&g.only===khuV.S.n&&g.e.textContent==='ATSH cấp 3-4'){g.e.remove();g.dead=1;}});tags=tags.filter(function(g){return !g.dead;});
